@@ -21,7 +21,6 @@ AssetInjectHTMLWebpackPlugin.prototype.apply = function (compiler) {
                 return args.assets.js.map(renderScriptTag).join('\n')
             }).replace(RE_CHUNK_INJECT_POINT, function (match, name, type) {
                 var chunk = args.assets.chunks[name]
-                console.log(chunk)
                 if (chunk) {
                     return type === 'js' ?
                         renderScriptTag(chunk.entry) :
