@@ -8,7 +8,7 @@
 </head>
 <body>
 
-<h1>...</h1>
+<h1>loading...</h1>
 
 <#include "./foot.ftl">
 <!-- js_inject_point -->

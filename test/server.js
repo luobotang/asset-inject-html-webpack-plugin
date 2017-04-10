@@ -1,12 +1,16 @@
+var http = require('http')
 var express = require('express')
 var ftlMiddleware = require('ftl-server/lib/ftl')
+var ftlLiveMiddleware = require('ftl-server/lib/live')
 var webpackMiddleware = require('webpack-dev-middleware')
 var webpack = require('webpack')
 var webpackConfig = require('./webpack.config')
 
 var app = express()
+app.server = http.createServer(app)
+app.use(ftlLiveMiddleware(app.server))
 app.use(ftlMiddleware)
 app.use(webpackMiddleware(webpack(webpackConfig)))
-app.listen(8765, function () {
+app.server.listen(8765, function () {
     console.log('listen on 8765')
 })
