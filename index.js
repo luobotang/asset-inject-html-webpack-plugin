@@ -1,38 +1,98 @@
 var RE_CSS_INJECT_POINT = /<!--\s*css_inject_point\s*-->/gi
 var RE_JS_INJECT_POINT = /<!--\s*js_inject_point\s*-->/gi
 var RE_CHUNK_INJECT_POINT = /<!--\s*chunk_(\S+)_(js|css)_inject_point\s*-->/gi
+var RE_ASSERT_INJECT_POINT = /<!--\s*asset_(\S+)_(js|css)_inject_point\s*-->/gi
+var RE_TEXT_INJECT_POINT = /<!--\s*text_(\S+)_(js|css)_inject_point\s*-->/gi
 
-function renderStyleTag(path) {
-    return '<link rel="stylesheet" href="' + path + '">'
+function AssetInjectHTMLWebpackPlugin(options) {
+    this.options = Object.assign({
+        assets: null,
+        texts: null
+    }, options)
 }
-
-function renderScriptTag(path) {
-    return '<script src="' + path + '"></script>'
-}
-
-function AssetInjectHTMLWebpackPlugin() { }
 
 AssetInjectHTMLWebpackPlugin.prototype.apply = function (compiler) {
+    var assets = this.options.assets;
+    var texts = this.options.texts;
+
     compiler.plugin('compilation', function (compilation) {
         compilation.plugin('html-webpack-plugin-before-html-processing', function (args, callback) {
-            args.html = args.html.replace(RE_CSS_INJECT_POINT, function () {
-                return args.assets.css.map(renderStyleTag).join('\n')
-            }).replace(RE_JS_INJECT_POINT, function () {
-                return args.assets.js.map(renderScriptTag).join('\n')
-            }).replace(RE_CHUNK_INJECT_POINT, function (match, name, type) {
-                var chunk = args.assets.chunks[name]
-                if (chunk) {
-                    return type === 'js' ?
-                        renderScriptTag(chunk.entry) :
-                        chunk.css.map(renderStyleTag).join('\n')
-                } else {
-                    console.error('can not find chunk: ' + name)
-                    return ''
-                }
-            })
-            callback(null, args)
+            try {
+                args.html = args.html
+                    .replace(RE_CSS_INJECT_POINT, function () {
+                        return renderStyleTag(args.assets.css)
+                    })
+                    .replace(RE_JS_INJECT_POINT, function () {
+                        return renderScriptTag(args.assets.js)
+                    })
+                    .replace(RE_CHUNK_INJECT_POINT, function (match, name, type) {
+                        var chunk = args.assets.chunks[name]
+                        if (chunk) {
+                            return type === 'js' ?
+                                renderScriptTag(chunk.entry) :
+                                renderStyleTag(chunk.css)
+                        } else {
+                            throw new Error('can not find chunk: ' + name)
+                        }
+                    })
+                    .replace(RE_ASSERT_INJECT_POINT, function (match, name, type) {
+                        var asset = assets && assets[name]
+                        if (asset) {
+                            return type === 'js' ?
+                                renderScriptTag(asset) :
+                                renderStyleTag(asset)
+                        } else {
+                            throw new Error('can not find asset: ' + name + ', from: ' + match)
+                        }
+                    })
+                    .replace(RE_TEXT_INJECT_POINT, function (match, name, type) {
+                        var text = texts && texts[name]
+                        if (text) {
+                            return type === 'js' ?
+                                renderInlineScriptTag(text) :
+                                renderInlineStyleTag(text)
+                        } else {
+                            throw new Error('can not find text: ' + name + ', from: ' + match)
+                        }
+                    })
+                callback(null, args)
+            } catch (e) {
+                callback(e)
+            }
         })
     })
 }
 
 module.exports = AssetInjectHTMLWebpackPlugin
+
+function renderStyleTag(path) {
+    return renderTag(path, _renderStyleTag)
+}
+
+function renderScriptTag(path) {
+    return renderTag(path, _renderScriptTag)
+}
+
+function renderTag(path, renderFn) {
+    if (Array.isArray(path)) {
+        return path.map(renderFn).join('\n')
+    } else {
+        return renderFn(path)
+    }
+}
+
+function _renderStyleTag(path) {
+    return '<link rel="stylesheet" href="' + path + '">'
+}
+
+function _renderScriptTag(path) {
+    return '<script src="' + path + '"></script>'
+}
+
+function renderInlineStyleTag(text) {
+    return '<style>' + text + '</style>'
+}
+
+function renderInlineScriptTag(text) {
+    return '<script>' + text + '</script>'
+}

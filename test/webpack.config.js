@@ -1,3 +1,4 @@
+var fs = require('fs')
 var path = require('path')
 var webpack = require('webpack')
 var CleanWebpackPlugin = require('clean-webpack-plugin')
@@ -68,7 +69,14 @@ module.exports = {
             alwaysWriteToDisk: true
         }),
         new HtmlWebpackHarddiskPlugin(),
-        new AssetInjectHtmlPlugin()
+        new AssetInjectHtmlPlugin({
+            assets: {
+                bootstrap: 'http://localhost:8765/css/bootstrap.css'
+            },
+            texts: {
+                ga: fs.readFileSync(path.join(__dirname, './ga.js'), 'UTF-8')
+            }
+        })
     ],
     devServer: {
         port: DEV_PORT

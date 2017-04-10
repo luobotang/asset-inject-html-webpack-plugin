@@ -62,3 +62,27 @@ After webpack bundle, the output ```output.html``` is:
 </body>
 </html>
 ```
+
+## options
+
+** assets **
+
+e.g.
+
+```javascript
+{
+    bootstrap: 'http://localhost/css/bootstrap.css',
+    jquery: 'http://localhost/js/jquery.js'
+}
+```
+
+** texts **
+
+e.g.
+
+```javascript
+{
+    foo: 'var bar = {}; /* ... */',
+    base: 'h1 { color: red; } p { font-size: 24px; } /* ... */'
+}
+```
