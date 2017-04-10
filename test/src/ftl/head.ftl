@@ -1,5 +1,5 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="X-UA-Compatible" content="ie=edge">
-<title>TEST - asset-inject-html-webpack-plugin</title>
+<title>${title}</title>
 <!-- css_inject_point -->

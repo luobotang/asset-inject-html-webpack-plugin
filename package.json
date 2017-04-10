@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "webpack --config test/webpack.config.js",
-    "start-ftl": "fs -c test/ftl.config.js",
-    "start-webpack": "webpack-dev-server --config test/webpack.config.js"
+    "start": "node test/server.js -c test/ftl.config.js"
   },
   "repository": {
     "type": "git",
@@ -26,11 +25,13 @@
   "devDependencies": {
     "clean-webpack-plugin": "^0.1.16",
     "css-loader": "^0.28.0",
+    "express": "^4.15.2",
     "extract-text-webpack-plugin": "^2.1.0",
     "ftl-server": "^1.0.1",
     "html-webpack-harddisk-plugin": "^0.1.0",
     "html-webpack-plugin": "^2.28.0",
     "webpack": "^2.3.3",
+    "webpack-dev-middleware": "^1.10.1",
     "webpack-dev-server": "^2.4.2"
   }
 }

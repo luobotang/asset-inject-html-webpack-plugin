@@ -9,7 +9,7 @@ var AssetInjectHtmlPlugin = require('..')
 var baseCssExtract = new ExtractTextPlugin('css/base.[hash].css')
 var indexCssExtract = new ExtractTextPlugin('css/index.[hash].css')
 
-var DEV_PORT = 8080
+var DEV_PORT = 8765
 
 module.exports = {
     context: __dirname,
@@ -29,6 +29,9 @@ module.exports = {
         }, {
             test: /index\.css$/,
             use: indexCssExtract.extract('css-loader')
+        }, {
+            test: /\.ftl$/,
+            use: './ftl-loader.js'
         }]
     },
     resolve: {

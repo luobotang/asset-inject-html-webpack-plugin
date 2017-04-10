@@ -1,3 +1,5 @@
+<#assign title="TEST - asset-inject-html-webpack-plugin">
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
