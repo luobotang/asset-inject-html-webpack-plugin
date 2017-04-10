@@ -1,5 +1,6 @@
-var RE_CSS_INJECT_POINT = /<!--\s*css_inject_point\s*-->/i
-var RE_JS_INJECT_POINT = /<!--\s*js_inject_point\s*-->/i
+var RE_CSS_INJECT_POINT = /<!--\s*css_inject_point\s*-->/gi
+var RE_JS_INJECT_POINT = /<!--\s*js_inject_point\s*-->/gi
+var RE_CHUNK_INJECT_POINT = /<!--\s*chunk_(\S+)_(js|css)_inject_point\s*-->/gi
 
 function renderStyleTag(path) {
     return '<link rel="stylesheet" href="' + path + '">'
@@ -18,6 +19,17 @@ AssetInjectHTMLWebpackPlugin.prototype.apply = function (compiler) {
                 return args.assets.css.map(renderStyleTag).join('\n')
             }).replace(RE_JS_INJECT_POINT, function () {
                 return args.assets.js.map(renderScriptTag).join('\n')
+            }).replace(RE_CHUNK_INJECT_POINT, function (match, name, type) {
+                var chunk = args.assets.chunks[name]
+                console.log(chunk)
+                if (chunk) {
+                    return type === 'js' ?
+                        renderScriptTag(chunk.entry) :
+                        chunk.css.map(renderStyleTag).join('\n')
+                } else {
+                    console.error('can not find chunk: ' + name)
+                    return ''
+                }
             })
             callback(null, args)
         })

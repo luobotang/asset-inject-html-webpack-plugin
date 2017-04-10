@@ -15,20 +15,18 @@ module.exports = {
     context: __dirname,
     entry: {
         index: './src/js/index.js',
-        common: './src/js/common.js'
+        common: './src/js/common.js',
+        vendor: './src/js/vendor.js'
     },
     output: {
         path: path.join(__dirname, 'dist'),
         publicPath: 'http://localhost:' + DEV_PORT + '/',
-        filename: 'js/[name].[hash].js'
+        filename: 'js/[name].[chunkhash].js'
     },
     module: {
         rules: [{
-            test: /base\.css$/,
-            use: baseCssExtract.extract('css-loader')
-        }, {
-            test: /index\.css$/,
-            use: indexCssExtract.extract('css-loader')
+            test: /\.css$/,
+            use: ExtractTextPlugin.extract('css-loader')
         }, {
             test: /\.ftl$/,
             use: './ftl-loader.js'
@@ -45,8 +43,9 @@ module.exports = {
             name: 'common',
             chunks: ['common', 'index']
         }),
-        baseCssExtract,
-        indexCssExtract,
+        new ExtractTextPlugin({
+            filename: 'css/[name].[chunkhash].css'
+        }),
         new HtmlWebpackPlugin({
             filename: 'ftl/index.ftl',
             template: './src/ftl/index.ftl',
@@ -57,14 +56,14 @@ module.exports = {
         new HtmlWebpackPlugin({
             filename: 'ftl/head.ftl',
             template: './src/ftl/head.ftl',
-            chunks: ['common'],
+            chunks: ['common', 'vendor'],
             inject: false,
             alwaysWriteToDisk: true
         }),
         new HtmlWebpackPlugin({
             filename: 'ftl/foot.ftl',
             template: './src/ftl/foot.ftl',
-            chunks: ['common'],
+            chunks: ['common', 'vendor'],
             inject: false,
             alwaysWriteToDisk: true
         }),

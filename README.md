@@ -16,7 +16,9 @@ In ```template.html```:
 </head>
 <body>
 ...
-<!-- js_inject_point -->
+<!-- chunk_vendor_js_inject_point -->
+<!-- chunk_common_js_inject_point -->
+<!-- chunk_index_js_inject_point -->
 ...
 </body>
 </html>
@@ -47,13 +49,15 @@ After webpack bundle, the output ```output.html``` is:
 <html>
 <head>
 ...
-<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/common.css">
+<link rel="stylesheet" href="css/index.css">
 ...
 </head>
 <body>
 ...
+<script src="js/vendor.js"></script>
 <script src="js/common.js"></script>
-<script src="js/app.js"></script>
+<script src="js/index.js"></script>
 ...
 </body>
 </html>

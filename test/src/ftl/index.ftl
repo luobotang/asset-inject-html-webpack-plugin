@@ -4,7 +4,7 @@
 <html lang="en">
 <head>
 <#include "./head.ftl">
-<!-- css_inject_point -->
+<!-- chunk_index_css_inject_point -->
 </head>
 <body>
 
