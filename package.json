@@ -1,6 +1,6 @@
 {
   "name": "asset-inject-html-webpack-plugin",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Inject assets into HTML template, extension plugin of html-webpack-plugin.",
   "main": "index.js",
   "scripts": {
