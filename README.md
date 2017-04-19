@@ -1,6 +1,6 @@
 # asset-inject-html-webpack-plugin
 
-Inject assets into HTML template, extension plugin of html-webpack-plugin.
+Inject assets into HTML template, extension plugin of the webpack plugin [html-webpack-plugin](https://www.npmjs.com/package/html-webpack-plugin).
 
 ## usage
 
@@ -40,9 +40,20 @@ To inject asset, just put comment tag like ```<!-- css_inject_point -->``` in yo
 And ```sub-type```:
 
 - chunk
+
+  e.g. ```<!-- js_inject_point_chunk_index -->```
+
 - asset
+
+  e.g. ```<!-- js_inject_point_asset_jquery -->```
+
 - text
+
+  e.g. ```<!-- js_inject_point_asset_foo -->```
+
 - inline
+
+  e.g. ```<!-- js_inject_point_inline_bar -->```
 
 ## demo
 
