@@ -1,11 +1,11 @@
 var path = require('path')
 
-var RE_CSS_INJECT_POINT = /<!--\s*css_inject_point\s*-->/gi
-var RE_JS_INJECT_POINT = /<!--\s*js_inject_point\s*-->/gi
-var RE_CHUNK_INJECT_POINT = /<!--\s*chunk_(\S+)_(js|css)_inject_point\s*-->/gi
-var RE_ASSERT_INJECT_POINT = /<!--\s*asset_(\S+)_(js|css)_inject_point\s*-->/gi
-var RE_TEXT_INJECT_POINT = /<!--\s*text_(\S+)_(js|css)_inject_point\s*-->/gi
-var RE_INLINE_INJECT_POINT = /<!--\s*inline_(\S+)_(js|css)_inject_point\s*-->/gi
+/**
+ * <!-- css_inject_point[_<ex-type>_<ex-name>] -->
+ * ex-type: chunk | asset | text | inline
+ * ex-name: (anything)
+ */
+var RE_INJECT_POINT  = /<!--\s*(js|css)_inject_point(_(chunk|asset|text|inline)_(\S+))?\s*-->/gi
 
 function AssetInjectHTMLWebpackPlugin(options) {
     this.options = Object.assign({
@@ -15,71 +15,77 @@ function AssetInjectHTMLWebpackPlugin(options) {
 }
 
 AssetInjectHTMLWebpackPlugin.prototype.apply = function (compiler) {
-    var assets = this.options.assets
-    var texts = this.options.texts
     var self = this
-
     compiler.plugin('compilation', function (compilation) {
-        compilation.plugin('html-webpack-plugin-before-html-processing', function (args, callback) {
+        compilation.plugin('html-webpack-plugin-before-html-processing', function (htmlPluginArgs, callback) {
             try {
-                args.html = args.html
-                    .replace(RE_CSS_INJECT_POINT, function () {
-                        return renderStyleTag(args.assets.css)
+                htmlPluginArgs.html = htmlPluginArgs.html.replace(RE_INJECT_POINT, function (match, type, ex, exType, exName) {
+                    return self.replaceInjectPoint(compilation, htmlPluginArgs, {
+                        match: match,
+                        type: type,
+                        ex: ex,
+                        exType: exType,
+                        exName: exName
                     })
-                    .replace(RE_JS_INJECT_POINT, function () {
-                        return renderScriptTag(args.assets.js)
-                    })
-                    .replace(RE_CHUNK_INJECT_POINT, function (match, name, type) {
-                        var chunk = args.assets.chunks[name]
-                        if (chunk) {
-                            return type === 'js' ?
-                                renderScriptTag(chunk.entry) :
-                                renderStyleTag(chunk.css)
-                        } else {
-                            throw new Error('can not find chunk: ' + name)
-                        }
-                    })
-                    .replace(RE_ASSERT_INJECT_POINT, function (match, name, type) {
-                        var asset = assets && assets[name]
-                        if (asset) {
-                            return type === 'js' ?
-                                renderScriptTag(asset) :
-                                renderStyleTag(asset)
-                        } else {
-                            throw new Error('can not find asset: ' + name + ', from: ' + match)
-                        }
-                    })
-                    .replace(RE_TEXT_INJECT_POINT, function (match, name, type) {
-                        var text = texts && texts[name]
-                        if (text) {
-                            return type === 'js' ?
-                                renderInlineScriptTag(text) :
-                                renderInlineStyleTag(text)
-                        } else {
-                            throw new Error('can not find text: ' + name + ', from: ' + match)
-                        }
-                    })
-                    .replace(RE_INLINE_INJECT_POINT, function (match, name, type) {
-                        var chunk = args.assets.chunks[name]
-                        if (chunk) {
-                            var assets = type === 'js' ? chunk.entry : chunk.css
-                        } else {
-                            throw new Error('can not find chunk: ' + name)
-                        }
-                        var renderFn = type === 'js' ? renderInlineScriptTag : renderInlineStyleTag
-                        if (!Array.isArray(assets)) {
-                            assets = [assets]
-                        }
-                        return assets.map(function (assetUrl) {
-                            return renderFn(self.getAssetSource(compilation, assetUrl))
-                        }).join('\n')
-                    })
-                callback(null, args)
+                })
+                callback(null, htmlPluginArgs)
             } catch (e) {
                 callback(e)
             }
         })
     })
+}
+
+AssetInjectHTMLWebpackPlugin.prototype.replaceInjectPoint = function (compilation, htmlPluginArgs, match) {
+    var assets = this.options.assets
+    var texts = this.options.texts
+    var self = this
+
+    var renderTagFn = match.type === 'js' ? renderScriptTag : renderStyleTag
+    var renderInlineTagFn = match.type === 'js' ? renderInlineScriptTag : renderInlineStyleTag
+
+    if (!match.ex) {
+        return renderTagFn(match.type === 'js' ? htmlPluginArgs.assets.js : htmlPluginArgs.assets.css)
+    }
+
+    switch (match.exType) {
+        case 'chunk':
+            var chunk = htmlPluginArgs.assets.chunks[match.exName]
+            if (chunk) {
+                return renderTagFn(match.type === 'js' ? chunk.entry : chunk.css)
+            } else {
+                throw new Error('can not find chunk: ' + match.exName)
+            }
+        case 'asset':
+            var asset = assets && assets[match.exName]
+            if (asset) {
+                return renderTagFn(asset)
+            } else {
+                throw new Error('can not find asset: ' + name + ', from: ' + match.match)
+            }
+        case 'text':
+            var text = texts && texts[match.exName]
+            if (text) {
+                return renderInlineTagFn(text)
+            } else {
+                throw new Error('can not find text: ' + match.exName + ', from: ' + match.match)
+            }
+        case 'inline':
+            var chunk = htmlPluginArgs.assets.chunks[match.exName]
+            if (chunk) {
+                var _assets = match.type === 'js' ? chunk.entry : chunk.css
+            } else {
+                throw new Error('can not find chunk: ' + match.exName)
+            }
+            if (!Array.isArray(_assets)) {
+                _assets = [_assets]
+            }
+            return _assets.map(function (assetUrl) {
+                return renderInlineTagFn(self.getAssetSource(compilation, assetUrl))
+            }).join('\n')
+        default:
+            throw new Error('unsupported type: ' + match.exType + ', from: ' + match.match)
+    }
 }
 
 /**

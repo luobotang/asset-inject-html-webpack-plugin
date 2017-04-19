@@ -4,7 +4,7 @@
 <html lang="en">
 <head>
 <#include "./head.ftl">
-<!-- inline_index_css_inject_point -->
+<!-- css_inject_point_inline_index -->
 </head>
 <body>
 

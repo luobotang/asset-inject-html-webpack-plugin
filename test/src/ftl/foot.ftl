@@ -1,3 +1,3 @@
-<!-- chunk_vendor_js_inject_point -->
-<!-- inline_common_js_inject_point -->
-<!-- text_ga_js_inject_point -->
+<!-- js_inject_point_chunk_vendor -->
+<!-- js_inject_point_inline_common -->
+<!-- js_inject_point_text_ga -->

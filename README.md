@@ -4,26 +4,6 @@ Inject assets into HTML template, extension plugin of html-webpack-plugin.
 
 ## usage
 
-In ```template.html```:
-
-```html
-<!DOCTYPE html>
-<html>
-<head>
-...
-<!-- css_inject_point -->
-...
-</head>
-<body>
-...
-<!-- chunk_vendor_js_inject_point -->
-<!-- chunk_common_js_inject_point -->
-<!-- chunk_index_js_inject_point -->
-...
-</body>
-</html>
-```
-
 In ```webpack.config.js```:
 
 ```javascript
@@ -31,58 +11,39 @@ var HtmlWebpackPlugin = require('html-webpack-plugin')
 var AssetInjectHtmlWebpackPlugin = require('asset-inject-html-webpack-plugin')
 
 module.exports = {
-    // ...
     plugins: [
         // ...
         new HtmlWebpackPlugin({
-            template: 'template.html'
+            template: 'template.html',
+            filename: 'output.html'
         }),
-        new AssetInjectHtmlWebpackPlugin()
+        new AssetInjectHtmlWebpackPlugin({
+            assets: {
+                bootstrap: 'http://localhost/css/bootstrap.css',
+                jquery: 'http://localhost/js/jquery.js'
+            },
+            texts: {
+                foo: 'var bar = {}; /* ... */',
+                base: 'h1 { color: red; } p { font-size: 24px; } /* ... */'
+            }
+        })
     ]
 }
 ```
 
-After webpack bundle, the output ```output.html``` is:
+## inject-point
 
-```html
-<!DOCTYPE html>
-<html>
-<head>
-...
-<link rel="stylesheet" href="css/common.css">
-<link rel="stylesheet" href="css/index.css">
-...
-</head>
-<body>
-...
-<script src="js/vendor.js"></script>
-<script src="js/common.js"></script>
-<script src="js/index.js"></script>
-...
-</body>
-</html>
-```
+To inject asset, just put comment tag like ```<!-- css_inject_point -->``` in your HTML template file.
 
-## options
+```js_inject_point``` and ```css_inject_point``` are two main type.
 
-** assets **
+And ```sub-type```:
 
-e.g.
+- chunk
+- asset
+- text
+- inline
 
-```javascript
-{
-    bootstrap: 'http://localhost/css/bootstrap.css',
-    jquery: 'http://localhost/js/jquery.js'
-}
-```
+## demo
 
-** texts **
-
-e.g.
-
-```javascript
-{
-    foo: 'var bar = {}; /* ... */',
-    base: 'h1 { color: red; } p { font-size: 24px; } /* ... */'
-}
-```
+See ```test/webpack.config.js```.
