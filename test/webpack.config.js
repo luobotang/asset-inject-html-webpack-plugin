@@ -1,6 +1,7 @@
 var fs = require('fs')
 var path = require('path')
 var webpack = require('webpack')
+var uglify = require('uglify-js')
 var CleanWebpackPlugin = require('clean-webpack-plugin')
 var HtmlWebpackPlugin = require('html-webpack-plugin')
 var HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin')
@@ -27,7 +28,12 @@ module.exports = {
     module: {
         rules: [{
             test: /\.css$/,
-            use: ExtractTextPlugin.extract('css-loader')
+            use: ExtractTextPlugin.extract({
+                loader: 'css-loader',
+                options: {
+                    minimize: true
+                }
+            })
         }, {
             test: /\.ftl$/,
             use: './ftl-loader.js'
@@ -74,11 +80,16 @@ module.exports = {
                 bootstrap: 'http://localhost:8765/css/bootstrap.css'
             },
             texts: {
-                ga: fs.readFileSync(path.join(__dirname, './ga.js'), 'UTF-8')
+                ga: uglify.minify(
+                    fs.readFileSync(path.join(__dirname, './ga.js'), 'UTF-8'),
+                    {fromString: true}
+                ).code
             }
-        })
+        }),
+        new webpack.optimize.UglifyJsPlugin()
     ],
     devServer: {
+        hot: true,
         port: DEV_PORT
     }
 }

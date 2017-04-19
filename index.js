@@ -1,8 +1,11 @@
+var path = require('path')
+
 var RE_CSS_INJECT_POINT = /<!--\s*css_inject_point\s*-->/gi
 var RE_JS_INJECT_POINT = /<!--\s*js_inject_point\s*-->/gi
 var RE_CHUNK_INJECT_POINT = /<!--\s*chunk_(\S+)_(js|css)_inject_point\s*-->/gi
 var RE_ASSERT_INJECT_POINT = /<!--\s*asset_(\S+)_(js|css)_inject_point\s*-->/gi
 var RE_TEXT_INJECT_POINT = /<!--\s*text_(\S+)_(js|css)_inject_point\s*-->/gi
+var RE_INLINE_INJECT_POINT = /<!--\s*inline_(\S+)_(js|css)_inject_point\s*-->/gi
 
 function AssetInjectHTMLWebpackPlugin(options) {
     this.options = Object.assign({
@@ -12,8 +15,9 @@ function AssetInjectHTMLWebpackPlugin(options) {
 }
 
 AssetInjectHTMLWebpackPlugin.prototype.apply = function (compiler) {
-    var assets = this.options.assets;
-    var texts = this.options.texts;
+    var assets = this.options.assets
+    var texts = this.options.texts
+    var self = this
 
     compiler.plugin('compilation', function (compilation) {
         compilation.plugin('html-webpack-plugin-before-html-processing', function (args, callback) {
@@ -55,12 +59,37 @@ AssetInjectHTMLWebpackPlugin.prototype.apply = function (compiler) {
                             throw new Error('can not find text: ' + name + ', from: ' + match)
                         }
                     })
+                    .replace(RE_INLINE_INJECT_POINT, function (match, name, type) {
+                        var chunk = args.assets.chunks[name]
+                        if (chunk) {
+                            var assets = type === 'js' ? chunk.entry : chunk.css
+                        } else {
+                            throw new Error('can not find chunk: ' + name)
+                        }
+                        var renderFn = type === 'js' ? renderInlineScriptTag : renderInlineStyleTag
+                        if (!Array.isArray(assets)) {
+                            assets = [assets]
+                        }
+                        return assets.map(function (assetUrl) {
+                            return renderFn(self.getAssetSource(compilation, assetUrl))
+                        }).join('\n')
+                    })
                 callback(null, args)
             } catch (e) {
                 callback(e)
             }
         })
     })
+}
+
+/**
+ * `https://github.com/DustinJackson/html-webpack-inline-source-plugin`
+ */
+AssetInjectHTMLWebpackPlugin.prototype.getAssetSource = function (compilation, assetUrl) {
+    var publicUrlPrefix = compilation.outputOptions.publicPath || ''
+    var assetName = path.posix.relative(publicUrlPrefix, assetUrl)
+    var asset = compilation.assets[assetName]
+    return asset.source()
 }
 
 module.exports = AssetInjectHTMLWebpackPlugin
