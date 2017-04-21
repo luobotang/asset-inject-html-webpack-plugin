@@ -1,12 +1,14 @@
 var path = require('path')
 
 /**
- * <!-- css_inject_point[_<ex-type>_<ex-name>] [if_<arg>] -->
+ * <!-- <type>_inject_point[_<ex-type>_<ex-name>][ if_<arg>] --> # old
+ * <!-- <type>_inject_point[ <ex-type>_<ex-name>][ if_<arg>] -->
+ * type: js | css
  * ex-type: chunk | asset | text | inline
- * ex-name: (anything)
+ * ex-name: *
  * arg: *
  */
-var RE_INJECT_POINT  = /<!--\s*(js|css)_inject_point(_(chunk|asset|text|inline)_(\S+))?(\s+if_(\S+)\s*)?\s*-->/gi
+var RE_INJECT_POINT  = /<!--\s*(js|css)_inject_point((?:_|\s+)(chunk|asset|text|inline)_(\S+))?(\s+if_(\S+)\s*)?\s*-->/gi
 
 function AssetInjectHTMLWebpackPlugin(options) {
     this.options = Object.assign({
@@ -20,16 +22,19 @@ AssetInjectHTMLWebpackPlugin.prototype.apply = function (compiler) {
     compiler.plugin('compilation', function (compilation) {
         compilation.plugin('html-webpack-plugin-before-html-processing', function (htmlPluginArgs, callback) {
             try {
-                htmlPluginArgs.html = htmlPluginArgs.html.replace(RE_INJECT_POINT, function (match, type, ex, exType, exName, ifMatch, ifArg) {
-                    return self.replaceInjectPoint(compilation, htmlPluginArgs, {
-                        match: match,
-                        type: type,
-                        ex: ex,
-                        exType: exType,
-                        exName: exName,
-                        ifArg: ifMatch ? ifArg : null
-                    })
-                })
+                htmlPluginArgs.html = htmlPluginArgs.html.replace(
+                    RE_INJECT_POINT,
+                    function (match, type, ex, exType, exName, ifMatch, ifArg) {
+                        return self.replaceInjectPoint(compilation, htmlPluginArgs, {
+                            match: match,
+                            type: type,
+                            ex: ex,
+                            exType: exType,
+                            exName: exName,
+                            ifArg: ifMatch ? ifArg : null
+                        })
+                    }
+                )
                 callback(null, htmlPluginArgs)
             } catch (e) {
                 callback(e)
