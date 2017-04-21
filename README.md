@@ -35,7 +35,11 @@ module.exports = {
 
 To inject asset, just put comment tag like ```<!-- css_inject_point -->``` in your HTML template file.
 
+### main type
+
 ```js_inject_point``` and ```css_inject_point``` are two main type.
+
+### sub type
 
 And ```sub-type```:
 
@@ -54,6 +58,10 @@ And ```sub-type```:
 - inline
 
   e.g. ```<!-- js_inject_point_inline_bar -->```
+
+### conditional replace
+
+e.g. ```<!-- js_inject_point_asset_test if_local -->``` only do replace when ```options.args.local``` is true value.
 
 ## demo
 

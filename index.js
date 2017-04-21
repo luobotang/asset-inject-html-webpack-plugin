@@ -1,11 +1,12 @@
 var path = require('path')
 
 /**
- * <!-- css_inject_point[_<ex-type>_<ex-name>] -->
+ * <!-- css_inject_point[_<ex-type>_<ex-name>] [if_<arg>] -->
  * ex-type: chunk | asset | text | inline
  * ex-name: (anything)
+ * arg: *
  */
-var RE_INJECT_POINT  = /<!--\s*(js|css)_inject_point(_(chunk|asset|text|inline)_(\S+))?\s*-->/gi
+var RE_INJECT_POINT  = /<!--\s*(js|css)_inject_point(_(chunk|asset|text|inline)_(\S+))?(\s+if_(\S+)\s*)?\s*-->/gi
 
 function AssetInjectHTMLWebpackPlugin(options) {
     this.options = Object.assign({
@@ -19,13 +20,14 @@ AssetInjectHTMLWebpackPlugin.prototype.apply = function (compiler) {
     compiler.plugin('compilation', function (compilation) {
         compilation.plugin('html-webpack-plugin-before-html-processing', function (htmlPluginArgs, callback) {
             try {
-                htmlPluginArgs.html = htmlPluginArgs.html.replace(RE_INJECT_POINT, function (match, type, ex, exType, exName) {
+                htmlPluginArgs.html = htmlPluginArgs.html.replace(RE_INJECT_POINT, function (match, type, ex, exType, exName, ifMatch, ifArg) {
                     return self.replaceInjectPoint(compilation, htmlPluginArgs, {
                         match: match,
                         type: type,
                         ex: ex,
                         exType: exType,
-                        exName: exName
+                        exName: exName,
+                        ifArg: ifMatch ? ifArg : null
                     })
                 })
                 callback(null, htmlPluginArgs)
@@ -37,9 +39,15 @@ AssetInjectHTMLWebpackPlugin.prototype.apply = function (compiler) {
 }
 
 AssetInjectHTMLWebpackPlugin.prototype.replaceInjectPoint = function (compilation, htmlPluginArgs, match) {
+    var args = this.options.args
     var assets = this.options.assets
     var texts = this.options.texts
     var self = this
+
+    // do not replace if arg value not `true` in options.args
+    if (match.ifArg && (!args || !args[match.ifArg])) {
+        return ''
+    }
 
     var renderTagFn = match.type === 'js' ? renderScriptTag : renderStyleTag
     var renderInlineTagFn = match.type === 'js' ? renderInlineScriptTag : renderInlineStyleTag
