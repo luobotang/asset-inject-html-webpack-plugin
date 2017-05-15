@@ -74,7 +74,7 @@ AssetInjectHTMLWebpackPlugin.prototype.replaceInjectPoint = function (compilatio
             if (asset) {
                 return renderTagFn(asset)
             } else {
-                throw new Error('can not find asset: ' + name + ', from: ' + match.match)
+                throw new Error('can not find asset: ' + match.exName + ', from: ' + match.match)
             }
         case 'text':
             var text = texts && texts[match.exName]
