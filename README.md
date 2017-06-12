@@ -25,6 +25,9 @@ module.exports = {
             texts: {
                 foo: 'var bar = {}; /* ... */',
                 base: 'h1 { color: red; } p { font-size: 24px; } /* ... */'
+            },
+            favicons: {
+                default: 'http://example.com/favicon.png'
             }
         })
     ]
@@ -37,31 +40,30 @@ To inject asset, just put comment tag like ```<!-- css_inject_point -->``` in yo
 
 ### main type
 
-```js_inject_point``` and ```css_inject_point``` are two main type.
+- ```js_inject_point```
+- ```css_inject_point```
+- ```favicon_inject_point```
 
 ### sub type
 
-And ```sub-type```:
+Js and css inject points, have ```sub-type```:
 
-- chunk
+- chunk: ```<!-- js_inject_point chunk_index -->```
+- asset: ```<!-- js_inject_point asset_jquery -->```
+- text: ```<!-- js_inject_point asset_foo -->```
+- inline: ```<!-- js_inject_point inline_bar -->```
 
-  e.g. ```<!-- js_inject_point_chunk_index -->```
+Favicon inject points can have a optional name:
 
-- asset
+```html
+<!-- favicon_inject_point example -->
+```
 
-  e.g. ```<!-- js_inject_point_asset_jquery -->```
-
-- text
-
-  e.g. ```<!-- js_inject_point_asset_foo -->```
-
-- inline
-
-  e.g. ```<!-- js_inject_point_inline_bar -->```
+If not set, use options ```favicons.default``` as the favicon path.
 
 ### conditional replace
 
-e.g. ```<!-- js_inject_point_asset_test if_local -->``` only do replace when ```options.args.local``` is true value.
+e.g. ```<!-- js_inject_point asset_test if_local -->``` only do replace when ```options.args.local``` is true value.
 
 ## demo
 

@@ -1,14 +1,19 @@
 var path = require('path')
 
 /**
- * <!-- <type>_inject_point[_<ex-type>_<ex-name>][ if_<arg>] --> # old
  * <!-- <type>_inject_point[ <ex-type>_<ex-name>][ if_<arg>] -->
- * type: js | css
+ * type: js | csc
  * ex-type: chunk | asset | text | inline
  * ex-name: *
  * arg: *
+ * 
+ * or:
+ * 
+ * <!-- favicon_inject_point[ <name>] -->
+ * name: *
  */
-var RE_INJECT_POINT  = /<!--\s*(js|css)_inject_point((?:_|\s+)(chunk|asset|text|inline)_(\S+))?(\s+if_(\S+)\s*)?\s*-->/gi
+var RE_INJECT_POINT = /<!--\s*(js|css)_inject_point((?:_|\s+)(chunk|asset|text|inline)_(\S+))?(\s+if_(\S+)\s*)?\s*-->/gi
+var RE_INJECT_POINT_FAVICON = /<!--\s*favicon_inject_point((?:\s+)(\S+))?(\s+if_(\S+)\s*)?\s*-->/gi
 
 function AssetInjectHTMLWebpackPlugin(options) {
     this.options = Object.assign({
@@ -30,6 +35,16 @@ AssetInjectHTMLWebpackPlugin.prototype.apply = function (compiler) {
                             type: type,
                             ex: ex,
                             exType: exType,
+                            exName: exName,
+                            ifArg: ifMatch ? ifArg : null
+                        })
+                    }
+                ).replace(
+                    RE_INJECT_POINT_FAVICON,
+                    function (match, ex, exName, ifMatch, ifArg) {
+                        return self.replaceInjectPointFavicon(compilation, htmlPluginArgs, {
+                            match: match,
+                            ex: ex,
                             exName: exName,
                             ifArg: ifMatch ? ifArg : null
                         })
@@ -101,6 +116,26 @@ AssetInjectHTMLWebpackPlugin.prototype.replaceInjectPoint = function (compilatio
     }
 }
 
+AssetInjectHTMLWebpackPlugin.prototype.replaceInjectPointFavicon = function (compilation, htmlPluginArgs, match) {
+    var args = this.options.args
+    var favicons = this.options.favicons
+
+    // do not replace if arg value not `true` in options.args
+    if (match.ifArg && (!args || !args[match.ifArg])) {
+        return ''
+    }
+
+    var faviconPath = match.ex ?
+        favicons && favicons[match.exName] :
+        favicons && favicons.default
+
+    if (faviconPath) {
+        return renderFaviconTag(faviconPath)
+    } else {
+        throw new Error('can not find favicon of name: `' + match.exName + '`, from: ' + match.match)
+    }
+}
+
 /**
  * `https://github.com/DustinJackson/html-webpack-inline-source-plugin`
  */
@@ -143,4 +178,8 @@ function renderInlineStyleTag(text) {
 
 function renderInlineScriptTag(text) {
     return '<script>' + text + '</script>'
+}
+
+function renderFaviconTag(path) {
+    return '<link rel="icon" href="' + path + '">'
 }

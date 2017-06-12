@@ -4,7 +4,7 @@
 <html lang="en">
 <head>
 <#include "./head.ftl">
-<!-- css_inject_point_inline_index -->
+<!-- css_inject_point inline_index -->
 </head>
 <body>
 
@@ -13,7 +13,7 @@
 <#include "./foot.ftl">
 <!-- js_inject_point if_local -->
 <!-- js_inject_point inline_index if_online -->
-<!-- js_inject_point_asset_index-local-test if_local -->
-<!-- js_inject_point_asset_index-online-test if_online -->
+<!-- js_inject_point asset_index-local-test if_local -->
+<!-- js_inject_point asset_index-online-test if_online -->
 </body>
 </html>

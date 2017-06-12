@@ -1,17 +1,16 @@
 var fs = require('fs')
 var path = require('path')
 var webpack = require('webpack')
-var uglify = require('uglify-js')
+var CopyWebpackPlugin = require('copy-webpack-plugin')
 var CleanWebpackPlugin = require('clean-webpack-plugin')
 var HtmlWebpackPlugin = require('html-webpack-plugin')
 var HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin')
 var ExtractTextPlugin = require('extract-text-webpack-plugin')
+var WriteFilePlugin = require('write-file-webpack-plugin');
 var AssetInjectHtmlPlugin = require('..')
 
 var baseCssExtract = new ExtractTextPlugin('css/base.[hash].css')
 var indexCssExtract = new ExtractTextPlugin('css/index.[hash].css')
-
-var DEV_PORT = 8765
 
 module.exports = {
     context: __dirname,
@@ -22,7 +21,7 @@ module.exports = {
     },
     output: {
         path: path.join(__dirname, 'dist'),
-        publicPath: 'http://localhost:' + DEV_PORT + '/',
+        publicPath: '/',
         filename: 'js/[name].[chunkhash].js'
     },
     module: {
@@ -45,6 +44,10 @@ module.exports = {
         }
     },
     plugins: [
+        new CopyWebpackPlugin([{
+            from: 'src/images',
+            to: 'images'
+        }]),
         new CleanWebpackPlugin(['dist']),
         new webpack.optimize.CommonsChunkPlugin({
             name: 'common',
@@ -75,27 +78,12 @@ module.exports = {
             alwaysWriteToDisk: true
         }),
         new HtmlWebpackHarddiskPlugin(),
-        new AssetInjectHtmlPlugin({
-            assets: {
-                bootstrap: 'http://localhost:8765/css/bootstrap.css',
-                'index-local-test': '/index-local-test.js',
-                'index-online-test': '/index-online-test.js'
-            },
-            texts: {
-                ga: uglify.minify(
-                    fs.readFileSync(path.join(__dirname, './ga.js'), 'UTF-8'),
-                    {fromString: true}
-                ).code
-            },
-            args: {
-                local: false,
-                online: true
-            }
-        }),
-        new webpack.optimize.UglifyJsPlugin()
-    ],
-    devServer: {
-        hot: true,
-        port: DEV_PORT
-    }
+        new AssetInjectHtmlPlugin(require('./asset-inject.config')),
+        new webpack.optimize.UglifyJsPlugin(),
+        new WriteFilePlugin({
+            force: true,
+            test: /images/,
+            log: false
+        })
+    ]
 }

@@ -1,16 +1,14 @@
-var http = require('http')
+var path = require('path')
 var express = require('express')
-var ftlMiddleware = require('ftl-server/lib/ftl')
-var ftlLiveMiddleware = require('ftl-server/lib/live')
+var freemarkerMiddleware = require('freemarker-middleware')
 var webpackMiddleware = require('webpack-dev-middleware')
 var webpack = require('webpack')
 var webpackConfig = require('./webpack.config')
 
 var app = express()
-app.server = http.createServer(app)
-app.use(ftlLiveMiddleware(app.server))
-app.use(ftlMiddleware)
-app.use(webpackMiddleware(webpack(webpackConfig)))
-app.server.listen(8765, function () {
-    console.log('listen on 8765')
+app.use('/images', express.static('dist/images'))
+app.use(webpackMiddleware(webpack(webpackConfig), {stats: 'errors-only'}))
+app.use(freemarkerMiddleware(path.join(__dirname, 'dist/ftl')))
+app.listen(8899, function () {
+    console.log('listen on 8899')
 })
