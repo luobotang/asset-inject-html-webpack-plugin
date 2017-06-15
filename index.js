@@ -2,7 +2,7 @@ var path = require('path')
 
 /**
  * <!-- <type>_inject_point[ <ex-type>_<ex-name>][ if_<arg>] -->
- * type: js | csc
+ * type: js | css
  * ex-type: chunk | asset | text | inline
  * ex-name: *
  * arg: *
