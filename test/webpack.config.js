@@ -6,7 +6,6 @@ var CleanWebpackPlugin = require('clean-webpack-plugin')
 var HtmlWebpackPlugin = require('html-webpack-plugin')
 var HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin')
 var ExtractTextPlugin = require('extract-text-webpack-plugin')
-var WriteFilePlugin = require('write-file-webpack-plugin');
 var AssetInjectHtmlPlugin = require('..')
 
 var baseCssExtract = new ExtractTextPlugin('css/base.[hash].css')
@@ -79,11 +78,6 @@ module.exports = {
         }),
         new HtmlWebpackHarddiskPlugin(),
         new AssetInjectHtmlPlugin(require('./asset-inject.config')),
-        new webpack.optimize.UglifyJsPlugin(),
-        new WriteFilePlugin({
-            force: true,
-            test: /images/,
-            log: false
-        })
+        new webpack.optimize.UglifyJsPlugin()
     ]
 }

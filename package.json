@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "webpack --config test/webpack.config.js",
-    "start": "node test/server.js -c test/ftl.config.js"
+    "start": "node test/server.js"
   },
   "repository": {
     "type": "git",
@@ -32,7 +32,6 @@
     "html-webpack-harddisk-plugin": "^0.1.0",
     "html-webpack-plugin": "^2.28.0",
     "webpack": "^2.3.3",
-    "webpack-dev-middleware": "^1.10.1",
-    "write-file-webpack-plugin": "^4.1.0"
+    "webpack-dev-middleware": "^1.10.1"
   }
 }

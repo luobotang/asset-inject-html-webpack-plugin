@@ -94,6 +94,13 @@ AssetInjectHTMLWebpackPlugin.prototype.replaceInjectPoint = function (compilatio
         case 'text':
             var text = texts && texts[match.exName]
             if (text) {
+                if (typeof text === 'function') {
+                    try {
+                        text = text();
+                    } catch(e) {
+                        throw new Error('exec function for text: ' + match.exName + ' failed, message: ' + e.message);
+                    }
+                }
                 return renderInlineTagFn(text)
             } else {
                 throw new Error('can not find text: ' + match.exName + ', from: ' + match.match)

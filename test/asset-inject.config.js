@@ -9,10 +9,7 @@ module.exports = {
 		'index-online-test': '/index-online-test.js'
 	},
 	texts: {
-		ga: uglify.minify(
-			fs.readFileSync(path.join(__dirname, './ga.js'), 'UTF-8'),
-			{fromString: true}
-		).code
+		ga: getText(path.join(__dirname, './ga.js'))
 	},
 	args: {
 		local: false,
@@ -20,5 +17,12 @@ module.exports = {
 	},
 	favicons: {
 		default: '/images/example.ico'
+	}
+}
+
+function getText(file) {
+	return function() {
+		console.log('get file: ' + file)
+		return uglify.minify(fs.readFileSync(file, 'UTF-8'), {fromString: true}).code
 	}
 }

@@ -24,7 +24,8 @@ module.exports = {
             },
             texts: {
                 foo: 'var bar = {}; /* ... */',
-                base: 'h1 { color: red; } p { font-size: 24px; } /* ... */'
+                base: 'h1 { color: red; } p { font-size: 24px; } /* ... */',
+                bar: function() { return 'Now: ' + new Date() }
             },
             favicons: {
                 default: 'http://example.com/favicon.png'
