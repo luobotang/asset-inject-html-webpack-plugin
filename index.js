@@ -86,6 +86,9 @@ AssetInjectHTMLWebpackPlugin.prototype.replaceInjectPoint = function (compilatio
             }
         case 'asset':
             var asset = assets && assets[match.exName]
+            if (!asset && assets && typeof assets.$find === 'function') {
+                asset = assets.$find.call(null, match.exName, match.type)
+            }
             if (asset) {
                 return renderTagFn(asset)
             } else {
@@ -93,14 +96,10 @@ AssetInjectHTMLWebpackPlugin.prototype.replaceInjectPoint = function (compilatio
             }
         case 'text':
             var text = texts && texts[match.exName]
+            if (!text && texts && typeof texts.$find === 'function') {
+                text = texts.$find.call(null, match.exName, match.type)
+            }
             if (text) {
-                if (typeof text === 'function') {
-                    try {
-                        text = text();
-                    } catch(e) {
-                        throw new Error('exec function for text: ' + match.exName + ' failed, message: ' + e.message);
-                    }
-                }
                 return renderInlineTagFn(text)
             } else {
                 throw new Error('can not find text: ' + match.exName + ', from: ' + match.match)

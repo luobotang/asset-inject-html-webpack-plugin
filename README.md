@@ -20,12 +20,13 @@ module.exports = {
         new AssetInjectHtmlWebpackPlugin({
             assets: {
                 bootstrap: 'http://localhost/css/bootstrap.css',
-                jquery: 'http://localhost/js/jquery.js'
+                jquery: 'http://localhost/js/jquery.js',
+                $find: function (name, type) { return 'http://example.com/assets/' + name + '.' + type }
             },
             texts: {
                 foo: 'var bar = {}; /* ... */',
                 base: 'h1 { color: red; } p { font-size: 24px; } /* ... */',
-                bar: function() { return 'Now: ' + new Date() }
+                $find: function (name, type) { return type === 'js' ? getJsFile(name) : getCssFile(name) }
             },
             favicons: {
                 default: 'http://example.com/favicon.png'
