@@ -3,13 +3,13 @@ var path = require('path')
 /**
  * <!-- <type>_inject_point[ <ex-type>_<ex-name>][ if_<arg>] -->
  * type: js | css
- * ex-type: chunk | asset | text | inline
+ * ex-type: chunk | inline | asset | text
  * ex-name: *
  * arg: *
  * 
  * or:
  * 
- * <!-- favicon_inject_point[ <name>] -->
+ * <!-- favicon_inject_point[ <name>][ if_<arg>] -->
  * name: *
  */
 var RE_INJECT_POINT = /<!--\s*(js|css)_inject_point((?:_|\s+)(chunk|asset|text|inline)_(\S+))?(\s+if_(\S+)\s*)?\s*-->/gi
@@ -84,6 +84,19 @@ AssetInjectHTMLWebpackPlugin.prototype.replaceInjectPoint = function (compilatio
             } else {
                 throw new Error('can not find chunk: ' + match.exName)
             }
+        case 'inline':
+            var chunk = htmlPluginArgs.assets.chunks[match.exName]
+            if (chunk) {
+                var _assets = match.type === 'js' ? chunk.entry : chunk.css
+            } else {
+                throw new Error('can not find chunk: ' + match.exName)
+            }
+            if (!Array.isArray(_assets)) {
+                _assets = [_assets]
+            }
+            return _assets.map(function (assetUrl) {
+                return renderInlineTagFn(self.getAssetSource(compilation, assetUrl))
+            }).join('\n')
         case 'asset':
             var asset = assets && assets[match.exName]
             if (!asset && assets && typeof assets.$find === 'function') {
@@ -104,19 +117,6 @@ AssetInjectHTMLWebpackPlugin.prototype.replaceInjectPoint = function (compilatio
             } else {
                 throw new Error('can not find text: ' + match.exName + ', from: ' + match.match)
             }
-        case 'inline':
-            var chunk = htmlPluginArgs.assets.chunks[match.exName]
-            if (chunk) {
-                var _assets = match.type === 'js' ? chunk.entry : chunk.css
-            } else {
-                throw new Error('can not find chunk: ' + match.exName)
-            }
-            if (!Array.isArray(_assets)) {
-                _assets = [_assets]
-            }
-            return _assets.map(function (assetUrl) {
-                return renderInlineTagFn(self.getAssetSource(compilation, assetUrl))
-            }).join('\n')
         default:
             throw new Error('unsupported type: ' + match.exType + ', from: ' + match.match)
     }

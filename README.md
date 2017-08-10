@@ -51,9 +51,9 @@ To inject asset, just put comment tag like ```<!-- css_inject_point -->``` in yo
 Js and css inject points, have ```sub-type```:
 
 - chunk: ```<!-- js_inject_point chunk_index -->```
-- asset: ```<!-- js_inject_point asset_jquery -->```
-- text: ```<!-- js_inject_point asset_foo -->```
 - inline: ```<!-- js_inject_point inline_bar -->```
+- asset: ```<!-- js_inject_point asset_jquery -->```
+- text: ```<!-- js_inject_point text_foo -->```
 
 Favicon inject points can have a optional name:
 
