@@ -22,6 +22,9 @@ function AssetInjectHTMLWebpackPlugin(options) {
     }, options)
 }
 
+/**
+ * @throw AssetInjectError
+ */
 AssetInjectHTMLWebpackPlugin.prototype.apply = function (compiler) {
     var self = this
     compiler.plugin('compilation', function (compilation) {
@@ -82,14 +85,14 @@ AssetInjectHTMLWebpackPlugin.prototype.replaceInjectPoint = function (compilatio
             if (chunk) {
                 return renderTagFn(match.type === 'js' ? chunk.entry : chunk.css)
             } else {
-                throw new Error('can not find chunk: ' + match.exName)
+                throw new AssetInjectError(`no chunk "${match.exName}"`, match)
             }
         case 'inline':
             var chunk = htmlPluginArgs.assets.chunks[match.exName]
             if (chunk) {
                 var _assets = match.type === 'js' ? chunk.entry : chunk.css
             } else {
-                throw new Error('can not find chunk: ' + match.exName)
+                throw new AssetInjectError(`no chunk "${match.exName}" for inline`, match)
             }
             if (!Array.isArray(_assets)) {
                 _assets = [_assets]
@@ -105,7 +108,7 @@ AssetInjectHTMLWebpackPlugin.prototype.replaceInjectPoint = function (compilatio
             if (asset) {
                 return renderTagFn(asset)
             } else {
-                throw new Error('can not find asset: ' + match.exName + ', from: ' + match.match)
+                throw new AssetInjectError(`no asset "${match.exName}"`, match)
             }
         case 'text':
             var text = texts && texts[match.exName]
@@ -115,10 +118,10 @@ AssetInjectHTMLWebpackPlugin.prototype.replaceInjectPoint = function (compilatio
             if (text) {
                 return renderInlineTagFn(text)
             } else {
-                throw new Error('can not find text: ' + match.exName + ', from: ' + match.match)
+                throw new AssetInjectError(`no text "${match.exName}"`, match)
             }
         default:
-            throw new Error('unsupported type: ' + match.exType + ', from: ' + match.match)
+            throw new AssetInjectError(`unsupported type "${match.exType}"`, match)
     }
 }
 
@@ -138,7 +141,7 @@ AssetInjectHTMLWebpackPlugin.prototype.replaceInjectPointFavicon = function (com
     if (faviconPath) {
         return renderFaviconTag(faviconPath)
     } else {
-        throw new Error('can not find favicon of name: `' + match.exName + '`, from: ' + match.match)
+        throw new AssetInjectError(`no favicon "${match.exName}"`, match)
     }
 }
 
@@ -189,3 +192,14 @@ function renderInlineScriptTag(text) {
 function renderFaviconTag(path) {
     return '<link rel="icon" href="' + path + '">'
 }
+
+/* AssetInjectError */
+
+function AssetInjectError(message, match) {
+    this.name = 'AssetInjectError'
+    this.message = `${message}, match "${match.match}"`
+    this.match = match
+    Error.captureStackTrace(this, AssetInjectError)
+}
+
+AssetInjectError.prototype = new Error()

@@ -3,6 +3,9 @@
   "version": "0.9.0",
   "description": "Inject assets into HTML template, extension plugin of html-webpack-plugin.",
   "main": "index.js",
+  "engines": {
+    "node": ">=6.4.0"
+  },
   "scripts": {
     "test": "webpack --config test/webpack.config.js",
     "start": "node test/server.js"
